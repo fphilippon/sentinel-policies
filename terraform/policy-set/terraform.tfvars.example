@@ -4,10 +4,12 @@ vcs_branch          = "main"
 working_directory   = "policy-sets/global-governance"
 
 # Use the connection style configured in your HCP Terraform organization.
-# GitHub App path, preferred for GitHub.com.
-github_app_installation_number = 12345678
+# GitHub App path, preferred for GitHub.com and HCP Terraform remote runs.
+github_app_installation_id = "ghain-xxxxxxxxxxxxxxxx"
+
+# Optional lookup paths for local runs with a user API token.
+# github_app_installation_number = 12345678
 # github_app_installation_name = "github-user-or-org"
-# github_app_installation_id   = "internal-hcp-terraform-installation-id"
 
 # Legacy OAuth path, only when the organization uses OAuth VCS providers.
 # oauth_token_id = "ot-xxxxxxxxxxxxxxxx"
