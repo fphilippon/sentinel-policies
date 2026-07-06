@@ -24,6 +24,7 @@ variable "policy_set_description" {
 variable "vcs_repo_identifier" {
   description = "VCS repository identifier, for example github-user/repo-name."
   type        = string
+  default     = "fphilippon/sentinel-policies"
 }
 
 variable "vcs_branch" {
@@ -58,7 +59,7 @@ variable "project_ids" {
 }
 
 variable "workspace_ids" {
-  description = "Workspace IDs to attach the policy set to for a narrow personal-org pilot."
+  description = "Workspace IDs to attach the policy set to when workspace-level scoping is required."
   type        = list(string)
   default     = []
 }

@@ -1,5 +1,7 @@
 organization        = "your-hcp-terraform-org"
-vcs_repo_identifier = "github-user/unilever-policy-as-code"
+vcs_repo_identifier = "fphilippon/sentinel-policies"
+vcs_branch          = "main"
+working_directory   = "policy-sets/global-governance"
 
 # Use the connection style configured in your HCP Terraform organization.
 oauth_token_id = "ot-xxxxxxxxxxxxxxxx"
@@ -8,5 +10,5 @@ oauth_token_id = "ot-xxxxxxxxxxxxxxxx"
 # Prefer project scope for the pilot project.
 project_ids = ["prj-xxxxxxxxxxxxxxxx"]
 
-# Use workspace scope instead if needed for a smaller personal pilot.
+# Use workspace scope instead if the customer explicitly requires workspace-level attachment.
 # workspace_ids = ["ws-xxxxxxxxxxxxxxxx"]
