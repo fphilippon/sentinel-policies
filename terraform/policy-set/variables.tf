@@ -41,7 +41,19 @@ variable "oauth_token_id" {
 }
 
 variable "github_app_installation_id" {
-  description = "GitHub App installation ID for the HCP Terraform VCS connection. Use this instead of oauth_token_id when applicable."
+  description = "Internal HCP Terraform GitHub App installation ID. Use this instead of oauth_token_id when already known."
+  type        = string
+  default     = null
+}
+
+variable "github_app_installation_number" {
+  description = "GitHub-side installation number from the GitHub App configuration URL, for example https://github.com/settings/installations/12345678."
+  type        = number
+  default     = null
+}
+
+variable "github_app_installation_name" {
+  description = "GitHub user or organization account name that installed the Terraform Cloud GitHub App."
   type        = string
   default     = null
 }
