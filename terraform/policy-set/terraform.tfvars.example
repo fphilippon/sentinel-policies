@@ -1,0 +1,12 @@
+organization        = "your-hcp-terraform-org"
+vcs_repo_identifier = "github-user/unilever-policy-as-code"
+
+# Use the connection style configured in your HCP Terraform organization.
+oauth_token_id = "ot-xxxxxxxxxxxxxxxx"
+# github_app_installation_id = "ghain-xxxxxxxxxxxxxxxx"
+
+# Prefer project scope for the pilot project.
+project_ids = ["prj-xxxxxxxxxxxxxxxx"]
+
+# Use workspace scope instead if needed for a smaller personal pilot.
+# workspace_ids = ["ws-xxxxxxxxxxxxxxxx"]

@@ -1,0 +1,56 @@
+import "tfplan/v2" as tfplan
+
+param required_labels default [
+	"application",
+	"environment",
+	"owner",
+	"cost_center",
+]
+
+param checked_resource_types default [
+	"google_compute_instance",
+	"google_compute_disk",
+	"google_storage_bucket",
+	"google_sql_database_instance",
+	"google_container_cluster",
+	"google_pubsub_topic",
+]
+
+has_relevant_action = func(actions) {
+	return actions contains "create" or actions contains "update"
+}
+
+labels_for = func(resource) {
+	if resource.change.after is null {
+		return {}
+	}
+
+	if resource.change.after contains "labels" {
+		return resource.change.after.labels
+	}
+
+	return {}
+}
+
+has_required_labels = func(labels) {
+	return all required_labels as label {
+		labels contains label and
+			labels[label] is not null and
+			labels[label] is not ""
+	}
+}
+
+managed_gcp_resources = filter tfplan.resource_changes as _, resource {
+	resource.mode is "managed" and
+		resource.type in checked_resource_types and
+		has_relevant_action(resource.change.actions)
+}
+
+violating_resources = filter managed_gcp_resources as _, resource {
+	not has_required_labels(labels_for(resource))
+}
+
+main = rule {
+	length(violating_resources) is 0
+}
+

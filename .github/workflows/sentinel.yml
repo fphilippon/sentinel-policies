@@ -1,0 +1,28 @@
+name: Sentinel
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  test:
+    name: Test Sentinel policies
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Sentinel
+        run: |
+          curl -fsSLo sentinel.zip https://releases.hashicorp.com/sentinel/0.40.0/sentinel_0.40.0_linux_amd64.zip
+          unzip sentinel.zip
+          sudo mv sentinel /usr/local/bin/sentinel
+          sentinel version
+
+      - name: Run policy tests
+        working-directory: policy-sets/global-governance
+        run: sentinel test
+
