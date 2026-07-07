@@ -1,0 +1,40 @@
+import "tfplan/v2" as tfplan
+
+has_relevant_action = func(actions) {
+	return actions contains "create" or actions contains "update"
+}
+
+planned = func(resource) {
+	if resource.change.after is null {
+		return {}
+	}
+
+	return resource.change.after
+}
+
+has_uniform_bucket_access = func(resource) {
+	after = planned(resource)
+	return after contains "uniform_bucket_level_access" and
+		after.uniform_bucket_level_access is true
+}
+
+has_public_access_prevention = func(resource) {
+	after = planned(resource)
+	return after contains "public_access_prevention" and
+		after.public_access_prevention is "enforced"
+}
+
+storage_buckets = filter tfplan.resource_changes as _, resource {
+	resource.mode is "managed" and
+		resource.type is "google_storage_bucket" and
+		has_relevant_action(resource.change.actions)
+}
+
+violating_resources = filter storage_buckets as _, resource {
+	not has_uniform_bucket_access(resource) or
+		not has_public_access_prevention(resource)
+}
+
+main = rule {
+	length(violating_resources) is 0
+}

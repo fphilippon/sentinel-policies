@@ -1,0 +1,78 @@
+resource_changes = {
+	"google_compute_instance.public": {
+		"address": "google_compute_instance.public",
+		"mode":    "managed",
+		"type":    "google_compute_instance",
+		"name":    "public",
+		"change": {
+			"actions": ["create"],
+			"before":  null,
+			"after": {
+				"network_interface": [
+					{
+						"network": "default",
+						"access_config": [
+							{
+								"nat_ip": "35.1.2.3",
+							},
+						],
+					},
+				],
+			},
+		},
+	},
+	"google_compute_firewall.open_ssh": {
+		"address": "google_compute_firewall.open_ssh",
+		"mode":    "managed",
+		"type":    "google_compute_firewall",
+		"name":    "open_ssh",
+		"change": {
+			"actions": ["create"],
+			"before":  null,
+			"after": {
+				"source_ranges": ["0.0.0.0/0"],
+				"allow": [
+					{
+						"protocol": "tcp",
+						"ports":    ["22"],
+					},
+				],
+			},
+		},
+	},
+	"google_storage_bucket.insecure": {
+		"address": "google_storage_bucket.insecure",
+		"mode":    "managed",
+		"type":    "google_storage_bucket",
+		"name":    "insecure",
+		"change": {
+			"actions": ["create"],
+			"before":  null,
+			"after": {
+				"uniform_bucket_level_access": false,
+				"public_access_prevention":    "inherited",
+			},
+		},
+	},
+	"google_sql_database_instance.public": {
+		"address": "google_sql_database_instance.public",
+		"mode":    "managed",
+		"type":    "google_sql_database_instance",
+		"name":    "public",
+		"change": {
+			"actions": ["create"],
+			"before":  null,
+			"after": {
+				"settings": [
+					{
+						"ip_configuration": [
+							{
+								"ipv4_enabled": true,
+							},
+						],
+					},
+				],
+			},
+		},
+	},
+}

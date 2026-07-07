@@ -15,15 +15,35 @@ locals {
       var.github_app_installation_name != null
     ] : enabled if enabled
   ])
+
+  project_policy_set_attachments = merge([
+    for policy_set_key, policy_set in var.policy_sets : {
+      for project_id in var.project_ids : "${policy_set_key}:${project_id}" => {
+        policy_set_key = policy_set_key
+        project_id     = project_id
+      }
+    }
+  ]...)
+
+  workspace_policy_set_attachments = merge([
+    for policy_set_key, policy_set in var.policy_sets : {
+      for workspace_id in var.workspace_ids : "${policy_set_key}:${workspace_id}" => {
+        policy_set_key = policy_set_key
+        workspace_id   = workspace_id
+      }
+    }
+  ]...)
 }
 
-resource "tfe_policy_set" "global_governance" {
-  name          = var.policy_set_name
-  description   = var.policy_set_description
+resource "tfe_policy_set" "this" {
+  for_each = var.policy_sets
+
+  name          = each.key
+  description   = each.value.description
   organization  = var.organization
   kind          = "sentinel"
   global        = var.global
-  policies_path = var.working_directory
+  policies_path = each.value.policies_path
 
   vcs_repo {
     identifier                 = var.vcs_repo_identifier
@@ -33,18 +53,18 @@ resource "tfe_policy_set" "global_governance" {
   }
 }
 
-resource "tfe_project_policy_set" "global_governance" {
-  for_each = toset(var.project_ids)
+resource "tfe_project_policy_set" "this" {
+  for_each = local.project_policy_set_attachments
 
-  project_id    = each.value
-  policy_set_id = tfe_policy_set.global_governance.id
+  project_id    = each.value.project_id
+  policy_set_id = tfe_policy_set.this[each.value.policy_set_key].id
 }
 
-resource "tfe_workspace_policy_set" "global_governance" {
-  for_each = toset(var.workspace_ids)
+resource "tfe_workspace_policy_set" "this" {
+  for_each = local.workspace_policy_set_attachments
 
-  workspace_id  = each.value
-  policy_set_id = tfe_policy_set.global_governance.id
+  workspace_id  = each.value.workspace_id
+  policy_set_id = tfe_policy_set.this[each.value.policy_set_key].id
 }
 
 check "policy_set_scope" {

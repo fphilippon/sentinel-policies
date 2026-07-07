@@ -59,9 +59,45 @@ variable "github_app_installation_name" {
 }
 
 variable "working_directory" {
-  description = "Directory containing sentinel.hcl for the policy set."
+  description = "Deprecated. Use policy_sets instead."
   type        = string
   default     = "policy-sets/global-governance"
+}
+
+variable "gcp_baseline_policy_set_name" {
+  description = "Deprecated. Use policy_sets instead."
+  type        = string
+  default     = "gcp-baseline"
+}
+
+variable "gcp_baseline_policy_set_description" {
+  description = "Deprecated. Use policy_sets instead."
+  type        = string
+  default     = "GCP security baseline controls for public exposure and managed-service hardening."
+}
+
+variable "gcp_baseline_working_directory" {
+  description = "Deprecated. Use policy_sets instead."
+  type        = string
+  default     = "policy-sets/gcp-baseline"
+}
+
+variable "policy_sets" {
+  description = "Policy sets to create from the configured VCS repository. The map key is used as the HCP Terraform policy set name."
+  type = map(object({
+    description   = string
+    policies_path = string
+  }))
+  default = {
+    global-governance = {
+      description   = "Pilot Sentinel policy set for common governance controls."
+      policies_path = "policy-sets/global-governance"
+    }
+    gcp-baseline = {
+      description   = "GCP security baseline controls for public exposure and managed-service hardening."
+      policies_path = "policy-sets/gcp-baseline"
+    }
+  }
 }
 
 variable "project_ids" {

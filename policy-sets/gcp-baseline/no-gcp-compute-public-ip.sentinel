@@ -1,0 +1,39 @@
+import "tfplan/v2" as tfplan
+
+has_relevant_action = func(actions) {
+	return actions contains "create" or actions contains "update"
+}
+
+network_interfaces_for = func(resource) {
+	if resource.change.after is null {
+		return []
+	}
+
+	if resource.change.after contains "network_interface" {
+		return resource.change.after.network_interface
+	}
+
+	return []
+}
+
+has_public_access_config = func(network_interface) {
+	return network_interface contains "access_config" and
+		network_interface.access_config is not null and
+		length(network_interface.access_config) > 0
+}
+
+compute_instances = filter tfplan.resource_changes as _, resource {
+	resource.mode is "managed" and
+		resource.type is "google_compute_instance" and
+		has_relevant_action(resource.change.actions)
+}
+
+violating_resources = filter compute_instances as _, resource {
+	any network_interfaces_for(resource) as network_interface {
+		has_public_access_config(network_interface)
+	}
+}
+
+main = rule {
+	length(violating_resources) is 0
+}

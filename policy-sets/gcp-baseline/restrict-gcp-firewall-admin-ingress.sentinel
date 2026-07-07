@@ -1,0 +1,74 @@
+import "tfplan/v2" as tfplan
+
+param restricted_admin_ports default [
+	"22",
+	"3389",
+]
+
+param unrestricted_source_ranges default [
+	"0.0.0.0/0",
+	"::/0",
+]
+
+has_relevant_action = func(actions) {
+	return actions contains "create" or actions contains "update"
+}
+
+planned = func(resource) {
+	if resource.change.after is null {
+		return {}
+	}
+
+	return resource.change.after
+}
+
+source_ranges_for = func(resource) {
+	after = planned(resource)
+
+	if after contains "source_ranges" and after.source_ranges is not null {
+		return after.source_ranges
+	}
+
+	return []
+}
+
+allows_for = func(resource) {
+	after = planned(resource)
+
+	if after contains "allow" and after.allow is not null {
+		return after.allow
+	}
+
+	return []
+}
+
+is_unrestricted = func(resource) {
+	return any source_ranges_for(resource) as source_range {
+		source_range in unrestricted_source_ranges
+	}
+}
+
+allows_restricted_admin_port = func(allow) {
+	return allow contains "ports" and
+		allow.ports is not null and
+		any allow.ports as port {
+			port in restricted_admin_ports
+		}
+}
+
+firewall_rules = filter tfplan.resource_changes as _, resource {
+	resource.mode is "managed" and
+		resource.type is "google_compute_firewall" and
+		has_relevant_action(resource.change.actions)
+}
+
+violating_resources = filter firewall_rules as _, resource {
+	is_unrestricted(resource) and
+		any allows_for(resource) as allow {
+			allows_restricted_admin_port(allow)
+		}
+}
+
+main = rule {
+	length(violating_resources) is 0
+}

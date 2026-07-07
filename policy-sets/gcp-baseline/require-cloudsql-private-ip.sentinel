@@ -1,0 +1,44 @@
+import "tfplan/v2" as tfplan
+
+has_relevant_action = func(actions) {
+	return actions contains "create" or actions contains "update"
+}
+
+settings_for = func(resource) {
+	if resource.change.after is null {
+		return []
+	}
+
+	if resource.change.after contains "settings" and resource.change.after.settings is not null {
+		return resource.change.after.settings
+	}
+
+	return []
+}
+
+has_public_ipv4_enabled = func(setting) {
+	if not (setting contains "ip_configuration") or setting.ip_configuration is null {
+		return true
+	}
+
+	return any setting.ip_configuration as ip_configuration {
+		ip_configuration contains "ipv4_enabled" and
+			ip_configuration.ipv4_enabled is true
+	}
+}
+
+cloudsql_instances = filter tfplan.resource_changes as _, resource {
+	resource.mode is "managed" and
+		resource.type is "google_sql_database_instance" and
+		has_relevant_action(resource.change.actions)
+}
+
+violating_resources = filter cloudsql_instances as _, resource {
+	any settings_for(resource) as setting {
+		has_public_ipv4_enabled(setting)
+	}
+}
+
+main = rule {
+	length(violating_resources) is 0
+}
